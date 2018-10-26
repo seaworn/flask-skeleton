@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <header class="content-header">
+        <h1>Login</h1>
+    </header>
+    <hr>
+    <form class="form" role="form" action="{{ url_for('user.login') }}" method="post">
+        {{ wtf.quick_form(form) }}
+        <p>Need to <a href="{{ url_for('user.register') }}">Register</a>?</p>
+    </form>
+{% endblock %}
