@@ -70,6 +70,7 @@ def create_app(appname, dest, env, git):
                     f.write('# Ignored files and directories\n')
                     if os.path.exists(env_dir):
                         f.write('venv/\n')
+                os.chdir(dest)
                 subprocess.run(['git', 'add', '.'])
                 subprocess.run(['git', 'commit', '-m', '"Creates app skeleton."'])
                 click.echo('done!')
