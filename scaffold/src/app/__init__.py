@@ -2,7 +2,6 @@ import os
 
 from flask import Flask, render_template
 from flask_login import LoginManager
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,7 +9,6 @@ from flask_migrate import Migrate
 
 # instantiate extensions
 login_manager = LoginManager()
-toolbar = DebugToolbarExtension()
 bootstrap = Bootstrap()
 db = SQLAlchemy()
 migrate = Migrate()
@@ -18,16 +16,18 @@ migrate = Migrate()
 
 def create_app():
 
+    from config import config
     from app.user.views import user_blueprint
     from app.main.views import main_blueprint
-    from app import models
+    from app.models import User, AnonymousUser
 
     # instantiate app
     app = Flask(__name__)
 
     # set app config
-    config = os.environ.get('APP_CONFIG', 'app.config.DevelopmentConfig')
-    app.config.from_object(config)
+    env = os.environ.get('FLASK_ENV', 'default')
+    app.config.from_object(config[env])
+    config[env].configure(app)
 
     # set up extensions
     for ext in (login_manager, bootstrap, db, migrate):
@@ -38,13 +38,13 @@ def create_app():
         app.register_blueprint(blueprint)
 
     # set up flask login
+    @login_manager.user_loader
+    def get_user(id):
+        return User.query.get(int(id))
+
     login_manager.login_view = 'user.login'
     login_manager.login_message_category = 'info'
-    login_manager.anonymous_user = models.AnonymousUser
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return models.User.query.get(int(user_id))
+    login_manager.anonymous_user = AnonymousUser
 
     # error handlers
     @app.errorhandler(401)
@@ -62,10 +62,5 @@ def create_app():
     @app.errorhandler(500)
     def server_error(error):
         return render_template('errors/500.html', error=error), 500
-
-    # flask cli context
-    @app.shell_context_processor
-    def get_context():
-        return dict(app=app, db=db, models=models)
 
     return app

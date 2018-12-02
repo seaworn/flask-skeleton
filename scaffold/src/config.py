@@ -11,6 +11,10 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
 
+    @staticmethod
+    def configure():
+        pass
+
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""
@@ -38,3 +42,10 @@ class ProductionConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL', 'sqlite:///' + os.path.join(base_dir, 'database.sqlite3'))
     WTF_CSRF_ENABLED = True
+
+
+config = dict(
+    development=DevelopmentConfig,
+    testing=TestingConfig,
+    production=ProductionConfig,
+    default=DevelopmentConfig)

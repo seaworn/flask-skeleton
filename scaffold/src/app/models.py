@@ -15,7 +15,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(60), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    active = db.Column(db.Boolean, default=False)
+    activated = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=dt.now)
 
     @hybrid_property
@@ -34,5 +34,4 @@ class User(db.Model, UserMixin):
 
 
 class AnonymousUser(AnonymousUserMixin):
-    # Add behaviour for consistency with the User model
     pass
