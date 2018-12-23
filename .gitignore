@@ -1,9 +1,8 @@
-# ignored folders
+# ignore folders
 __pycache__/
 venv/
-build/
 dist/
+flask_scaffold.egg-info/
 
-# ignored files
+# ignore files
 *.pyc
-flask-scaffold.spec

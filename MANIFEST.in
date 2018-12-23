@@ -1,0 +1,2 @@
+recursive-include flask_scaffold/scaffold *
+recursive-include flask_scaffold/templates *
