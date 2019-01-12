@@ -1,2 +1,3 @@
-recursive-include flask_scaffold/scaffold *
-recursive-include flask_scaffold/templates *
+recursive-include flask_skeleton/skeleton *
+recursive-include flask_skeleton/templates *
+include README.md

@@ -1,8 +1,10 @@
-# ignore folders
-__pycache__/
-venv/
-dist/
-flask_scaffold.egg-info/
-
 # ignore files
 *.pyc
+
+# ignore directories
+__pycache__/
+venv/
+build/
+dist/
+*.egg-info/
+tests/

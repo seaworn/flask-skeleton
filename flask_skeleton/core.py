@@ -12,21 +12,21 @@ import jinja2 as j2
 from . import __version__
 
 
-src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scaffold/flask-app')
+src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'skeleton')
 
-jinja_env = j2.Environment(loader=j2.PackageLoader('flask_scaffold'))
+jinja_env = j2.Environment(loader=j2.PackageLoader('flask_skeleton'))
 
 
 @click.command()
 @click.argument('appname')
 @click.option('-d', '--dest', default=None, type=click.Path(exists=True, writable=True),
-              help='The destination path of your app. Defaults to the current directory.')
+              help='Where to create your app. Defaults to the current directory.')
 @click.option('-v', '--virtualenv', is_flag=True, help='Create a virtual environment.')
 @click.option('-g', '--git', is_flag=True, help='Initialize a git repository.')
 @click.version_option(__version__, '-V', '--version')
 @click.help_option('-h', '--help')
-def create_app(appname, dest, virtualenv, git):
-    """Scaffold a Flask app."""
+def create_flask_app(appname, dest, virtualenv, git):
+    """Create a flask app skeleton."""
 
     dest = os.path.abspath(
         os.path.join(os.getcwd() if dest is None else dest, appname))
@@ -40,7 +40,8 @@ def create_app(appname, dest, virtualenv, git):
             path=dest,
             python_version=platform.python_version(),
             virtualenv=virtualenv,
-            git=git)
+            git=git
+        )
         click.echo(summary.render(context))
         click.confirm('Continue with these settings?', abort=True)
     if os.path.exists(dest):
@@ -48,12 +49,11 @@ def create_app(appname, dest, virtualenv, git):
         shutil.rmtree(dest)
     click.echo('Copying files...')
     shutil.copytree(src, dest)
-    click.echo('done!')
     if virtualenv is True:
         create_virtualenv(dest)
     if git is True:
         create_git_repo(dest)
-    click.echo('New app created in %s' % dest)
+    click.echo('Done!\n' 'New app created in %s' % dest)
 
 
 def create_virtualenv(dest):
@@ -77,9 +77,8 @@ def create_virtualenv(dest):
         sp.run([pip_exe, 'install', '-r', reqr], check=True)
         sp.run([pip_exe, 'freeze', '>', reqr], check=True)
     except sp.SubprocessError:
-        click.echo('A problem occurred with pip...Ignoring!')
-    else:
-        click.echo('done!')
+        click.echo('A problem occurred with pip...Skipping!')
+        return False
     return True
 
 
@@ -102,7 +101,6 @@ def create_git_repo(dest):
         sp.run([git_exe, 'commit', '-m', '"Creates app skeleton."'], check=True)
         sp.run([git_exe, 'checkout', '-b', 'devel'], check=True)
     except sp.SubprocessError:
-        click.echo('A problem occurred whith git...Ignoring!')
-    else:
-        click.echo('done!')
+        click.echo('A problem occurred whith git...Skipping!')
+        return False
     return True

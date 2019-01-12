@@ -1,5 +1,5 @@
-from app.core import create_app
+from flask_skeleton.core import create_flask_app
 
 
 if __name__ == '__main__':
-    create_app()
+    create_flask_app()
