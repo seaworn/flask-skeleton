@@ -1,19 +1,21 @@
 import os
 
-base_dir = os.path.abspath(os.path.dirname(__file__))
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class BaseConfig(object):
     """Base configuration."""
 
+    APP_NAME = 'Flask App'
     DEBUG_TB_ENABLED = False
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'a really hard to guess string')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'Ensure you set a secret key, this is important!')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
 
     @staticmethod
-    def configure():
-        pass
+    def configure(app):
+        # Implement this method to do further configuration on your app.
+        pass 
 
 
 class DevelopmentConfig(BaseConfig):
@@ -44,5 +46,4 @@ class ProductionConfig(BaseConfig):
 config = dict(
     development=DevelopmentConfig,
     testing=TestingConfig,
-    production=ProductionConfig,
-    default=DevelopmentConfig)
+    production=ProductionConfig)

@@ -1,106 +1,105 @@
-#!/usr/bin/env python
-
 import os
+import sys
 import shutil
 import platform
-import venv
-import subprocess as sp
+import subprocess
 
 import click
-import jinja2 as j2
+import jinja2
 
 from . import __version__
 
-
 src = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'skeleton')
-
-jinja_env = j2.Environment(loader=j2.PackageLoader('flask_skeleton'))
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(os.path.abspath(__file__))))
 
 
 @click.command()
-@click.argument('appname')
-@click.option('-d', '--dest', default=None, type=click.Path(exists=True, writable=True),
-              help='Where to create your app. Defaults to the current directory.')
-@click.option('-v', '--virtualenv', is_flag=True, help='Create a virtual environment.')
+@click.argument('app_name', type=click.STRING)
+@click.option(
+	'-d', '--dir', default=None, type=click.Path(exists=True, writable=True),
+    help='Where to create your app. Defaults to the current directory.')
+@click.option('-e', '--env', is_flag=True, help='Create a virtual environment.')
 @click.option('-g', '--git', is_flag=True, help='Initialize a git repository.')
 @click.version_option(__version__, '-V', '--version')
 @click.help_option('-h', '--help')
-def create_flask_app(appname, dest, virtualenv, git):
+def create_flask_app(app_name, dir, env, git):
     """Create a flask app skeleton."""
-
-    dest = os.path.abspath(
-        os.path.join(os.getcwd() if dest is None else dest, appname))
+    dest = os.path.abspath(os.path.join(os.getcwd() if dir is None else dir, app_name))
     try:
-        summary = jinja_env.get_template('summary.jinja2')
-    except j2.TemplateNotFound:
+        summary = jinja_env.get_template('summary.jinja')
+    except jinja2.TemplateNotFound:
         pass
     else:
-        context = dict(
-            appname=appname,
+        click.echo(summary.render(dict(
+            app_name=app_name,
             path=dest,
-            python_version=platform.python_version(),
-            virtualenv=virtualenv,
-            git=git
-        )
-        click.echo(summary.render(context))
+            version=platform.python_version(),
+            env=env,
+            git=git)))
         click.confirm('Continue with these settings?', abort=True)
     if os.path.exists(dest):
         click.confirm('The destination already exists. Overwrite?', abort=True)
         shutil.rmtree(dest)
     click.echo('Copying files...')
     shutil.copytree(src, dest)
-    if virtualenv is True:
-        create_virtualenv(dest)
+    if env is True:
+        create_env(dest, 'env')
     if git is True:
-        create_git_repo(dest)
-    click.echo('Done!\n' 'New app created in %s' % dest)
+        init_git_repo(dest)
+    click.echo('Done! App created in: %s' % dest)
 
 
-def create_virtualenv(dest):
-    """Create a virtual environment
-    :param dest: full path to the project root
+def create_env(dest, env_name):
     """
-
-    click.echo('Creating virtual environment...')
-    env_dir = os.path.join(dest, 'venv')
+    Create a virtual environment.
+    :param dest: The full path to the project root.
+    """
+    click.echo('Creating a virtual environment...')
+    virtualenv = shutil.which('virtualenv')
+    if virtualenv is None:
+        click.echo('Failed to find virtualenv executable...Skipping!')
+        return False
+    env_path = os.path.join(dest, env_name)
     try:
-        venv.create(env_dir, with_pip=True)
-    except Exception:
-        click.echo('A problem occured whith venv...Skipping!')
+        subprocess.run([virtualenv, '--python=%s' % sys.executable, env_path], check=True)
+    except subprocess.SubprocessError:
+        click.echo('A problem occured whith virtualenv...Skipping!')
         return False
     with open(os.path.join(dest, '.gitignore'), 'a') as f:
-        f.write('%s/' % os.path.basename(env_dir))
+        f.write('%s/' % os.path.basename(env_path))
     click.echo('Installing packages...')
-    pip_exe = os.path.join(env_dir, 'bin/pip')
-    reqr = os.path.join(dest, 'requirements.txt')
+    pip = os.path.join(env_path, 'bin/pip')
+    requirements = os.path.join(dest, 'requirements.txt')
     try:
-        sp.run([pip_exe, 'install', '-r', reqr], check=True)
-        sp.run([pip_exe, 'freeze', '>', reqr], check=True)
-    except sp.SubprocessError:
+        subprocess.run([pip, 'install', '-r', requirements], check=True)
+        subprocess.run([pip, 'freeze', '>', requirements], check=True)
+    except subprocess.SubprocessError:
         click.echo('A problem occurred with pip...Skipping!')
         return False
-    return True
+    else:
+        return True
 
-
-def create_git_repo(dest):
-    """Initialize a git repository
-    :param dest: full path to the project root
+    
+def init_git_repo(dest):
     """
-
+    Initialize a git repository.
+    :param dest: The full path to the project root.
+    """
     click.echo('Initializing git repository...')
-    git_exe = shutil.which('git')
-    if git_exe is None:
+    git = shutil.which('git')
+    if git is None:
         click.echo('Failed to find git executable...Skipping!')
         return False
     os.environ['GIT_WORK_TREE'] = dest
     os.environ['GIT_DIR'] = os.path.join(dest, '.git')
     try:
-        sp.run([git_exe, 'init'], check=True)
+        subprocess.run([git, 'init'], check=True)
         click.echo('Committing changes...')
-        sp.run([git_exe, 'add', dest], check=True)
-        sp.run([git_exe, 'commit', '-m', '"Creates app skeleton."'], check=True)
-        sp.run([git_exe, 'checkout', '-b', 'devel'], check=True)
-    except sp.SubprocessError:
+        subprocess.run([git, 'add', dest], check=True)
+        subprocess.run([git, 'commit', '-m', '"Creates app skeleton."'], check=True)
+        subprocess.run([git, 'checkout', '-b', 'devel'], check=True)
+    except subprocess.SubprocessError:
         click.echo('A problem occurred whith git...Skipping!')
         return False
-    return True
+    else:
+        return True

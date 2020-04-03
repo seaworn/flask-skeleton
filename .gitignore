@@ -1,10 +1,10 @@
-# ignore files
-*.pyc
-
 # ignore directories
+.vscode/
 __pycache__/
-venv/
 build/
 dist/
 *.egg-info/
-tests/
+env/
+
+# ignore files
+*.pyc

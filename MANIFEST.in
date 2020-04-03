@@ -1,3 +1,7 @@
-recursive-include flask_skeleton/skeleton *
-recursive-include flask_skeleton/templates *
-include README.md
+graft tests
+recursive-include flask_skeleton *
+include LICENSE
+include requirements.txt
+prune flask_skeleton/skeleton/env
+global-exclude *.sqlite3
+global-exclude *.py[cod]
