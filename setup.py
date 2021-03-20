@@ -17,7 +17,7 @@ setup(
     url='https://github.com/enwawerueli/flask-skeleton',
     packages=['flask_skeleton'],
     include_package_data=True,
-    install_requires=['click==7.1.1', 'jinja2==2.11.1'],
+    install_requires=['click==7.1.1', 'jinja2==2.11.3'],
     entry_points='''
         [console_scripts]
         create-flask-app=flask_skeleton.core:create_flask_app
