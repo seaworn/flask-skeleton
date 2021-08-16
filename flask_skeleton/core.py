@@ -66,6 +66,7 @@ def create_env(dest, env_name='env'):
     try:
         subprocess.run([virtualenv, '--python=%s' % sys.executable, env_path], check=True)
     except subprocess.SubprocessError:
+        shutil.rmtree(env_path)
         click.echo('A problem occured whith virtualenv...Skipping!')
         return False
     with open(os.path.join(dest, '.gitignore'), 'a') as f:
