@@ -43,13 +43,13 @@ def create_flask_app(app_name, dir, env, git):
     click.echo('Copying files...')
     shutil.copytree(src, dest)
     if env is True:
-        create_env(dest, 'env')
+        create_env(dest)
     if git is True:
         init_git_repo(dest)
     click.echo('Done! App created in: %s' % dest)
 
 
-def create_env(dest, env_name):
+def create_env(dest, env_name='env'):
     """
     Create a virtual environment.
     :param dest: The full path to the project root.
@@ -66,7 +66,7 @@ def create_env(dest, env_name):
         click.echo('A problem occured whith virtualenv...Skipping!')
         return False
     with open(os.path.join(dest, '.gitignore'), 'a') as f:
-        f.write('%s/' % os.path.basename(env_path))
+        f.writelines(['\n', '%s/' % os.path.basename(env_path)])
     click.echo('Installing packages...')
     pip = os.path.join(env_path, 'bin/pip')
     requirements = os.path.join(dest, 'requirements.txt')
