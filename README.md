@@ -4,7 +4,7 @@ Basic flask app scaffolding.
 Includes a basic app structure and templates.
 
 ## Install with pip
-`pip install flask-skeleton`
+`$ pip install flask-skeleton`
 
 ## Run from the command line
 `$ create-flask-app [Options] APPNAME`
