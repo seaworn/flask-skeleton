@@ -3,6 +3,7 @@ import sys
 import shutil
 import platform
 import subprocess
+import secrets
 
 import click
 import jinja2
@@ -42,6 +43,8 @@ def create_flask_app(app_name, dir, env, git):
         shutil.rmtree(dest)
     click.echo('Copying files...')
     shutil.copytree(src, dest)
+    with open(os.path.join(dest, ".env"), "a") as f:
+        f.writelines(["\n", "SECRET_KEY=%s" % secrets.token_hex(32)])
     if env is True:
         create_env(dest)
     if git is True:
